@@ -5,6 +5,7 @@ import com.velocitypowered.api.command.SimpleCommand;
 import com.velocitypowered.api.proxy.Player;
 import de.townity.taler.common.TalerAmounts;
 import de.townity.taler.common.db.TalerRepository;
+import de.townity.taler.common.msg.TalerChat;
 import de.townity.taler.velocity.TalerVelocityPlugin;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -166,11 +167,7 @@ public final class VeloTalerCommand implements SimpleCommand {
     }
 
     private static Component success(String text) {
-        return Component.text()
-                .append(Component.text("TOWNITY.DE ", NamedTextColor.GOLD))
-                .append(Component.text("⇒ ", NamedTextColor.GRAY))
-                .append(Component.text(text, NamedTextColor.GRAY))
-                .build();
+        return TalerChat.info(text);
     }
 
     private static void sendUsage(CommandSource source) {

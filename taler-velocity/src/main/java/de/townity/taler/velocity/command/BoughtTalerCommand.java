@@ -5,7 +5,7 @@ import com.velocitypowered.api.command.SimpleCommand;
 import com.velocitypowered.api.proxy.Player;
 import de.townity.taler.common.TalerAmounts;
 import de.townity.taler.common.db.TalerRepository;
-import de.townity.taler.common.msg.TalerMessages;
+import de.townity.taler.common.msg.TalerChat;
 import de.townity.taler.velocity.TalerVelocityPlugin;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -18,7 +18,7 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 /**
- * Shop-/Webhook-Befehl: gutschreiben + Ingame-Kaufbenachrichtigung.
+ * Shop-/Webhook-Befehl: gutschreiben + gebündelte Ingame-Kaufbenachrichtigung.
  * Nutzung: {@code /boughttaler <Spieler> <Anzahl>}
  */
 public final class BoughtTalerCommand implements SimpleCommand {
@@ -57,42 +57,17 @@ public final class BoughtTalerCommand implements SimpleCommand {
             Resolved player = target.get();
             return plugin.service().add(player.uuid(), player.name(), amount)
                     .thenAccept(balance -> {
-                        notifyPurchase(player, amount);
-                        source.sendMessage(Component.text()
-                                .append(Component.text("TOWNITY.DE ", NamedTextColor.GOLD))
-                                .append(Component.text("⇒ ", NamedTextColor.GRAY))
-                                .append(Component.text(
-                                        "Kauf gutgeschrieben: " + plugin.service().format(amount)
-                                                + " an " + player.name()
-                                                + " (neu: " + plugin.service().format(balance) + ")",
-                                        NamedTextColor.GRAY
-                                ))
-                                .build());
+                        plugin.purchaseNotifyBatcher().enqueue(player.uuid(), player.name(), amount);
+                        source.sendMessage(TalerChat.info(
+                                "Kauf gutgeschrieben: " + plugin.service().format(amount)
+                                        + " an " + player.name()
+                                        + " (neu: " + plugin.service().format(balance) + ")"
+                        ));
                     })
                     .exceptionally(error -> {
                         source.sendMessage(Component.text("Datenbankfehler.", NamedTextColor.RED));
                         return null;
                     });
-        });
-    }
-
-    private void notifyPurchase(Resolved player, BigDecimal amount) {
-        Optional<Player> online = plugin.proxy().getPlayer(player.uuid());
-        if (online.isPresent()) {
-            Player proxyPlayer = online.get();
-            if (proxyPlayer.getCurrentServer().isPresent()) {
-                byte[] payload = TalerMessages.encodePurchaseNotify(player.uuid(), player.name(), amount);
-                proxyPlayer.getCurrentServer().get()
-                        .sendPluginMessage(TalerVelocityPlugin.CHANNEL, payload);
-                return;
-            }
-        }
-        plugin.executor().execute(() -> {
-            try {
-                plugin.pendingNotify().enqueue(player.uuid(), amount);
-            } catch (Exception exception) {
-                plugin.logger().error("Pending-Notify speichern fehlgeschlagen", exception);
-            }
         });
     }
 

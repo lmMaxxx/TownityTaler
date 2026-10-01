@@ -18,6 +18,7 @@ import de.townity.taler.common.service.DefaultTalerService;
 import de.townity.taler.velocity.command.BoughtTalerCommand;
 import de.townity.taler.velocity.command.VeloTalerCommand;
 import de.townity.taler.velocity.config.VelocityConfig;
+import de.townity.taler.velocity.notify.PurchaseNotifyBatcher;
 import org.slf4j.Logger;
 
 import java.nio.file.Path;
@@ -45,6 +46,7 @@ public final class TalerVelocityPlugin {
     private PendingNotifyRepository pendingNotify;
     private MojangUuidResolver uuidResolver;
     private ExecutorService executor;
+    private PurchaseNotifyBatcher purchaseNotifyBatcher;
 
     @Inject
     public TalerVelocityPlugin(ProxyServer proxy, Logger logger, @DataDirectory Path dataDirectory) {
@@ -71,6 +73,7 @@ public final class TalerVelocityPlugin {
             TalerRepository repository = new TalerRepository(database);
             service = new DefaultTalerService(repository, executor, jdkLogger);
             uuidResolver = new MojangUuidResolver();
+            purchaseNotifyBatcher = new PurchaseNotifyBatcher(this);
 
             proxy.getChannelRegistrar().register(CHANNEL);
             proxy.getCommandManager().register(
@@ -93,12 +96,19 @@ public final class TalerVelocityPlugin {
 
     @Subscribe
     public void onShutdown(ProxyShutdownEvent event) {
+        if (purchaseNotifyBatcher != null) {
+            purchaseNotifyBatcher.shutdown();
+        }
         if (executor != null) {
             executor.shutdownNow();
         }
         if (database != null) {
             database.close();
         }
+    }
+
+    public PurchaseNotifyBatcher purchaseNotifyBatcher() {
+        return purchaseNotifyBatcher;
     }
 
     public ProxyServer proxy() {
