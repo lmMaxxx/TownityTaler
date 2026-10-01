@@ -16,7 +16,7 @@ public final class TalerDatabase implements AutoCloseable {
             CREATE TABLE IF NOT EXISTS tt_balances (
               uuid CHAR(36) NOT NULL,
               name VARCHAR(16) NOT NULL,
-              balance DECIMAL(18,2) NOT NULL DEFAULT 0.00,
+              balance BIGINT NOT NULL DEFAULT 0,
               updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
                 ON UPDATE CURRENT_TIMESTAMP,
               PRIMARY KEY (uuid),
@@ -48,8 +48,14 @@ public final class TalerDatabase implements AutoCloseable {
         try (Connection connection = dataSource.getConnection();
              Statement statement = connection.createStatement()) {
             statement.execute(CREATE_TABLE);
+            // Bestehende Installationen: Nachkommastellen entfernen
+            try {
+                statement.execute("ALTER TABLE tt_balances MODIFY balance BIGINT NOT NULL DEFAULT 0");
+            } catch (SQLException ignored) {
+                // Spalte ggf. schon BIGINT
+            }
         }
-        logger.info("Taler-Schema bereit (tt_balances).");
+        logger.info("Taler-Schema bereit (tt_balances, ganzzahlig).");
     }
 
     public Connection connection() throws SQLException {

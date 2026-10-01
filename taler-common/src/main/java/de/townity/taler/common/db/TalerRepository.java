@@ -37,6 +37,7 @@ public final class TalerRepository {
     }
 
     public BigDecimal add(UUID uuid, String name, BigDecimal amount) throws SQLException {
+        requireWhole(amount);
         BigDecimal delta = TalerAmounts.normalize(amount);
         if (delta.signum() < 0) {
             throw new IllegalArgumentException("Betrag muss ≥ 0 sein");
@@ -57,6 +58,7 @@ public final class TalerRepository {
      * @return empty wenn nicht genug Guthaben
      */
     public Optional<BigDecimal> remove(UUID uuid, BigDecimal amount) throws SQLException {
+        requireWhole(amount);
         BigDecimal delta = TalerAmounts.normalize(amount);
         if (delta.signum() < 0) {
             throw new IllegalArgumentException("Betrag muss ≥ 0 sein");
@@ -83,6 +85,7 @@ public final class TalerRepository {
     }
 
     public BigDecimal set(UUID uuid, String name, BigDecimal amount) throws SQLException {
+        requireWhole(amount);
         BigDecimal value = TalerAmounts.normalize(amount);
         if (value.signum() < 0) {
             throw new IllegalArgumentException("Betrag muss ≥ 0 sein");
@@ -127,7 +130,7 @@ public final class TalerRepository {
     private void ensureRow(UUID uuid, String name) throws SQLException {
         String sql = """
                 INSERT INTO tt_balances (uuid, name, balance)
-                VALUES (?, ?, 0.00)
+                VALUES (?, ?, 0)
                 ON DUPLICATE KEY UPDATE name = VALUES(name)
                 """;
         try (Connection connection = database.connection();
@@ -135,6 +138,15 @@ public final class TalerRepository {
             statement.setString(1, uuid.toString());
             statement.setString(2, sanitizeName(name));
             statement.executeUpdate();
+        }
+    }
+
+    private static void requireWhole(BigDecimal amount) {
+        if (amount == null) {
+            throw new IllegalArgumentException("Betrag fehlt");
+        }
+        if (amount.remainder(BigDecimal.ONE).signum() != 0) {
+            throw new IllegalArgumentException("Taler nur ganzzahlig");
         }
     }
 

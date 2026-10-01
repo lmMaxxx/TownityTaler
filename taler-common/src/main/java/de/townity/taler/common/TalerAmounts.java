@@ -7,30 +7,37 @@ import java.text.DecimalFormatSymbols;
 import java.util.Locale;
 import java.util.Optional;
 
-/** Betrags-Helfer: max. 2 Nachkommastellen, DE-Format, Suffix „ Taler“. */
+/**
+ * Betrags-Helfer: nur ganze Zahlen, DE-Tausenderpunkte, Suffix „ Taler“.
+ * Beispiel: {@code 1.000 Taler}
+ */
 public final class TalerAmounts {
 
-    public static final int SCALE = 2;
+    public static final int SCALE = 0;
     public static final String UNIT = " Taler";
 
     private static final DecimalFormat FORMAT;
 
     static {
         DecimalFormatSymbols symbols = DecimalFormatSymbols.getInstance(Locale.GERMANY);
-        FORMAT = new DecimalFormat("#,##0.00", symbols);
+        FORMAT = new DecimalFormat("#,##0", symbols);
     }
 
     private TalerAmounts() {
     }
 
     public static BigDecimal normalize(BigDecimal amount) {
-        return amount.setScale(SCALE, RoundingMode.HALF_UP);
+        return amount.setScale(SCALE, RoundingMode.DOWN);
     }
 
     public static BigDecimal zero() {
-        return BigDecimal.ZERO.setScale(SCALE, RoundingMode.HALF_UP);
+        return BigDecimal.ZERO.setScale(SCALE, RoundingMode.UNNECESSARY);
     }
 
+    /**
+     * Parst nur ganze Beträge. Erlaubt DE-Tausender ({@code 2.500} → 2500).
+     * Nachkommastellen ({@code 1,5} / {@code 1.50}) → empty.
+     */
     public static Optional<BigDecimal> parse(String raw) {
         if (raw == null || raw.isBlank()) {
             return Optional.empty();
@@ -39,23 +46,43 @@ public final class TalerAmounts {
         if (trimmed.toLowerCase(Locale.ROOT).endsWith("taler")) {
             trimmed = trimmed.substring(0, trimmed.length() - 5).trim();
         }
-        if (trimmed.contains(",") && trimmed.contains(".")) {
-            if (trimmed.lastIndexOf(',') > trimmed.lastIndexOf('.')) {
-                trimmed = trimmed.replace(".", "").replace(',', '.');
-            } else {
-                trimmed = trimmed.replace(",", "");
-            }
-        } else if (trimmed.contains(",")) {
-            trimmed = trimmed.replace(',', '.');
-        } else if (trimmed.contains(".") && isGermanThousands(trimmed)) {
-            trimmed = trimmed.replace(".", "");
+        if (trimmed.isEmpty()) {
+            return Optional.empty();
         }
-        int dot = trimmed.indexOf('.');
-        if (dot >= 0 && trimmed.length() - dot - 1 > SCALE) {
+
+        // Komma als Dezimaltrenner → Nachkommastellen nicht erlaubt
+        if (trimmed.contains(",")) {
+            int comma = trimmed.indexOf(',');
+            String after = trimmed.substring(comma + 1).replace(".", "");
+            if (!after.isEmpty() && after.chars().anyMatch(c -> c != '0')) {
+                return Optional.empty();
+            }
+            // ,00 o. ä. → Komma und Nachkommastellen streichen
+            trimmed = trimmed.substring(0, comma).replace(".", "");
+        } else if (trimmed.contains(".")) {
+            if (isGermanThousands(trimmed)) {
+                trimmed = trimmed.replace(".", "");
+            } else {
+                // z. B. 1.5 oder 1.50 → Nachkommastellen
+                return Optional.empty();
+            }
+        }
+
+        if (!trimmed.chars().allMatch(Character::isDigit)) {
+            return Optional.empty();
+        }
+        if (trimmed.length() > 15) {
             return Optional.empty();
         }
         try {
-            return Optional.of(normalize(new BigDecimal(trimmed)));
+            BigDecimal value = new BigDecimal(trimmed);
+            if (value.signum() < 0) {
+                return Optional.empty();
+            }
+            if (value.scale() > 0 && value.stripTrailingZeros().scale() > 0) {
+                return Optional.empty();
+            }
+            return Optional.of(normalize(value));
         } catch (NumberFormatException exception) {
             return Optional.empty();
         }
@@ -73,7 +100,7 @@ public final class TalerAmounts {
             return false;
         }
         for (int i = 1; i < parts.length; i++) {
-            if (parts[i].length() != 3) {
+            if (parts[i].length() != 3 || !parts[i].chars().allMatch(Character::isDigit)) {
                 return false;
             }
         }

@@ -52,7 +52,7 @@ taler.add(uuid, name, amount);
 taler.remove(uuid, amount); // Optional.empty = zu wenig
 taler.set(uuid, name, amount);
 taler.has(uuid, amount);
-String pretty = taler.format(amount); // z. B. 1.000,00 Taler
+String pretty = taler.format(amount); // z. B. 1.000 Taler
 ```
 
 Maven-Abhängigkeit (nach Publish / lokal install):

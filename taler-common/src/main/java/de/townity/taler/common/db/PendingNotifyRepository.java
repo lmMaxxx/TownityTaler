@@ -26,7 +26,7 @@ public final class PendingNotifyRepository {
                 CREATE TABLE IF NOT EXISTS tt_pending_notify (
                   id BIGINT NOT NULL AUTO_INCREMENT,
                   uuid CHAR(36) NOT NULL,
-                  amount DECIMAL(18,2) NOT NULL,
+                  amount BIGINT NOT NULL,
                   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
                   PRIMARY KEY (id),
                   KEY idx_tt_pending_uuid (uuid)
@@ -35,6 +35,11 @@ public final class PendingNotifyRepository {
         try (Connection connection = database.connection();
              Statement statement = connection.createStatement()) {
             statement.execute(sql);
+            try {
+                statement.execute("ALTER TABLE tt_pending_notify MODIFY amount BIGINT NOT NULL");
+            } catch (SQLException ignored) {
+                // bereits BIGINT
+            }
         }
     }
 
