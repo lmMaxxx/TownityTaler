@@ -1,0 +1,10 @@
+# Townity Taler – Paper (Unterserver)
+# Dieselbe MySQL-Datenbank wie das Velocity-Plugin
+
+database:
+  host: "127.0.0.1"
+  port: 3306
+  name: "townity_taler"
+  user: "taler"
+  password: "changeme"
+  pool-size: 4

@@ -1,0 +1,21 @@
+# Maven / IDE
+target/
+.idea/
+*.iml
+.classpath
+.project
+.settings/
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Secrets / local config copies
+**/config.local.yml
+**/config.local.toml
+.env
+*.log
+
+# Build
+dependency-reduced-pom.xml

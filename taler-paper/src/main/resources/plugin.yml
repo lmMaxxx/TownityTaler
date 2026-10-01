@@ -1,0 +1,7 @@
+name: TownityTaler
+version: ${project.version}
+main: de.townity.taler.paper.TalerPaperPlugin
+api-version: "1.21"
+author: Townity
+description: Netzwerkweite Taler-API für Unterserver
+load: STARTUP

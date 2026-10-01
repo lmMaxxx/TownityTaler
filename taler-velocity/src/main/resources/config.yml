@@ -1,0 +1,10 @@
+# Townity Taler – Velocity
+# Eigene MySQL-Datenbank (nicht die Citybuild-DB)
+
+database:
+  host: "127.0.0.1"
+  port: 3306
+  name: "townity_taler"
+  user: "taler"
+  password: "changeme"
+  pool-size: 4
