@@ -13,7 +13,9 @@ Netzwerkweite **Taler**-Währung für Townity (Velocity + Paper), eigene MySQL-D
 
 ## Velocity
 
-JAR nach `plugins/` legen. Config: `plugins/townity-taler/config.yml` (eigene DB `townity_taler`).
+JAR nach `plugins/` legen. Zugangsdaten liegen im eigenen Ordner:
+
+`plugins/TalerAPI/config.yml` (eigene MySQL-DB `townity_taler`).
 
 ### Befehle
 
@@ -29,7 +31,9 @@ Offline-Spieler werden über DB-Name bzw. Mojang-API aufgelöst. Ist der Spieler
 
 ## Paper (Unterserver)
 
-JAR auf **jedem** Backend, das Taler braucht. Gleiche MySQL-Config wie Velocity.
+JAR auf **jedem** Backend, das Taler braucht. Zugangsdaten:
+
+`plugins/TalerAPI/config.yml` (dieselbe MySQL-DB wie Velocity).
 
 ### API für andere Plugins
 
@@ -62,7 +66,7 @@ Maven-Abhängigkeit (nach Publish / lokal install):
 </dependency>
 ```
 
-Soft-Depend in `plugin.yml`: `softdepend: [TownityTaler]`
+Soft-Depend in `plugin.yml`: `softdepend: [TalerAPI]`
 
 ## Build
 

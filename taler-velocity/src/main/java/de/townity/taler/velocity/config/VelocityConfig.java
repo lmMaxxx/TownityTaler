@@ -23,8 +23,10 @@ public final class VelocityConfig {
     }
 
     public static VelocityConfig load(Path dataDirectory, Logger logger) throws IOException {
-        Files.createDirectories(dataDirectory);
-        Path file = dataDirectory.resolve("config.yml");
+        // Fester Ordner plugins/TalerAPI (nicht plugins/talerapi)
+        Path configDir = resolveTalerApiFolder(dataDirectory);
+        Files.createDirectories(configDir);
+        Path file = configDir.resolve("config.yml");
         if (!Files.exists(file)) {
             try (InputStream in = VelocityConfig.class.getClassLoader().getResourceAsStream("config.yml")) {
                 if (in == null) {
@@ -48,5 +50,14 @@ public final class VelocityConfig {
                 db.node("pool-size").getInt(4)
         );
         return new VelocityConfig(config);
+    }
+
+    /** Preferiert {@code plugins/TalerAPI} neben dem Velocity-DataDirectory. */
+    private static Path resolveTalerApiFolder(Path dataDirectory) {
+        Path parent = dataDirectory.getParent();
+        if (parent != null) {
+            return parent.resolve("TalerAPI");
+        }
+        return dataDirectory;
     }
 }

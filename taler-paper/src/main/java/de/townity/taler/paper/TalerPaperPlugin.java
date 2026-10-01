@@ -55,9 +55,9 @@ public final class TalerPaperPlugin extends JavaPlugin {
                     new de.townity.taler.paper.listener.JoinPendingNotifyListener(this),
                     this
             );
-            getLogger().info("TownityTaler (Paper) aktiv – TalerAPI registriert.");
+            getLogger().info("TalerAPI (Paper) aktiv – Service registriert.");
         } catch (Exception exception) {
-            getLogger().log(Level.SEVERE, "TownityTaler konnte nicht starten", exception);
+            getLogger().log(Level.SEVERE, "TalerAPI konnte nicht starten", exception);
             getServer().getPluginManager().disablePlugin(this);
         }
     }

@@ -1,4 +1,4 @@
-name: TownityTaler
+name: TalerAPI
 version: ${project.version}
 main: de.townity.taler.paper.TalerPaperPlugin
 api-version: "1.21"

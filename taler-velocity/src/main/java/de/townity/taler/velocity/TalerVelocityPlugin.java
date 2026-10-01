@@ -25,8 +25,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 @Plugin(
-        id = "townity-taler",
-        name = "TownityTaler",
+        id = "talerapi",
+        name = "TalerAPI",
         version = "1.0.0-SNAPSHOT",
         description = "Netzwerkweite Taler-Währung",
         authors = {"Townity"}
