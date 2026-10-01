@@ -55,11 +55,10 @@
                                     <pattern>com.zaxxer.hikari</pattern>
                                     <shadedPattern>de.townity.taler.lib.hikari</shadedPattern>
                                 </relocation>
-                                <relocation>
-                                    <pattern>com.mysql</pattern>
-                                    <shadedPattern>de.townity.taler.lib.mysql</shadedPattern>
-                                </relocation>
                             </relocations>
+                            <transformers>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
+                            </transformers>
                             <filters>
                                 <filter>
                                     <artifact>*:*</artifact>

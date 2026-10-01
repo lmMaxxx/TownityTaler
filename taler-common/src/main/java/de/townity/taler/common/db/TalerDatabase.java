@@ -30,6 +30,8 @@ public final class TalerDatabase implements AutoCloseable {
     public TalerDatabase(DatabaseConfig config, Logger logger) {
         this.logger = Objects.requireNonNull(logger, "logger");
         HikariConfig hikari = new HikariConfig();
+        // Explizit setzen – nach Shade-Relocation findet DriverManager den Treiber sonst nicht
+        hikari.setDriverClassName(com.mysql.cj.jdbc.Driver.class.getName());
         hikari.setJdbcUrl(config.jdbcUrl());
         hikari.setUsername(config.username());
         hikari.setPassword(config.password());

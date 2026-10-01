@@ -85,10 +85,9 @@ public final class TalerVelocityPlugin {
                             .build(),
                     new BoughtTalerCommand(this)
             );
-            logger.info("TownityTaler (Velocity) aktiv.");
+            logger.info("TalerAPI (Velocity) aktiv.");
         } catch (Exception exception) {
-            logger.error("TownityTaler konnte nicht starten", exception);
-            throw new IllegalStateException(exception);
+            logger.error("TalerAPI konnte nicht starten – Befehle sind deaktiviert", exception);
         }
     }
 
