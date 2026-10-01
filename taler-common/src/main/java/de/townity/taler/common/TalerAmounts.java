@@ -1,7 +1,5 @@
 package de.townity.taler.common;
 
-import de.townity.taler.api.TalerAPI;
-
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
@@ -9,10 +7,11 @@ import java.text.DecimalFormatSymbols;
 import java.util.Locale;
 import java.util.Optional;
 
-/** Betrags-Helfer: max. 2 Nachkommastellen, DE-Format. */
+/** Betrags-Helfer: max. 2 Nachkommastellen, DE-Format, Suffix „ Taler“. */
 public final class TalerAmounts {
 
     public static final int SCALE = 2;
+    public static final String UNIT = " Taler";
 
     private static final DecimalFormat FORMAT;
 
@@ -37,6 +36,9 @@ public final class TalerAmounts {
             return Optional.empty();
         }
         String trimmed = raw.trim().replace(" ", "");
+        if (trimmed.toLowerCase(Locale.ROOT).endsWith("taler")) {
+            trimmed = trimmed.substring(0, trimmed.length() - 5).trim();
+        }
         if (trimmed.contains(",") && trimmed.contains(".")) {
             if (trimmed.lastIndexOf(',') > trimmed.lastIndexOf('.')) {
                 trimmed = trimmed.replace(".", "").replace(',', '.');
@@ -61,7 +63,7 @@ public final class TalerAmounts {
 
     public static String format(BigDecimal amount) {
         synchronized (FORMAT) {
-            return FORMAT.format(normalize(amount)) + TalerAPI.CURRENCY_SYMBOL;
+            return FORMAT.format(normalize(amount)) + UNIT;
         }
     }
 

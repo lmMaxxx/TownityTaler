@@ -9,10 +9,10 @@ import java.util.concurrent.CompletableFuture;
  * Netzwerkweite Taler-API für Unterserver (Paper).
  * Zugriff typischerweise über Bukkit-{@code ServicesManager} oder
  * {@link TalerProvider#get()}.
+ * <p>
+ * Anzeige immer als Text {@code 1.000,00 Taler} – kein Währungssymbol.
  */
 public interface TalerAPI {
-
-    String CURRENCY_SYMBOL = "₮";
 
     CompletableFuture<BigDecimal> getBalance(UUID uuid);
 
@@ -39,6 +39,6 @@ public interface TalerAPI {
 
     CompletableFuture<Boolean> has(UUID uuid, BigDecimal amount);
 
-    /** Formatiert Beträge im DE-Stil, z. B. {@code 1.000,00₮}. */
+    /** Formatiert Beträge im DE-Stil, z. B. {@code 1.000,00 Taler}. */
     String format(BigDecimal amount);
 }
